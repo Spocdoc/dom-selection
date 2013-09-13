@@ -38,6 +38,10 @@ if typeof rangy.getSelection is 'function'
     catch _error
     return
 
+  $['selection']['delete'] = ->
+    rangy.getSelection()?.getRangeAt(0)?.deleteContents()
+    return
+
   $['selection']['isCollapsed'] = ->
     rangy.getSelection()?.isCollapsed
 
