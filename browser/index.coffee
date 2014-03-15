@@ -51,41 +51,44 @@ if typeof rangy.getSelection is 'function'
   # position relative to the viewport
   # returns object with top and left properties
   $['selection']['coords'] = (sel) ->
-    sel = sel?.sel or rangy.getSelection()
-
-    if (sel = rangy.getSelection()) and sel.rangeCount
+    if !sel? or sel.sel
+      sel = (sel && sel.sel) || rangy.getSelection()
       range = sel.getRangeAt(0)
-      if sel.isCollapsed
-        if (node = range.startContainer).nodeType is TEXT_NODE
-          if (offset = range.startOffset) is 0
-            range = rangy.createRange()
-            range.selectNode node
-            return range.getBoundingClientRect()
-          else
-            range = range.cloneRange()
-            range.setStart(node, offset-1)
-            rect = range.getBoundingClientRect()
-            if rect.height is 0
-              range.setStart(node, offset)
-              range.setEnd(node, offset+1)
-              return rect if (rect = range.getBoundingClientRect()).height isnt 0
-              range.selectNode node
-              rect = range.getBoundingClientRect()
-            return { top: rect.top, left: rect.right } if rect.height
-        else if containedNode = node.childNodes?[range.startOffset]
-          range = rangy.createRange()
-          range.selectNode containedNode
-          return range.getBoundingClientRect()
-        else if parentNode = node.parentNode
-          range = rangy.createRange()
-          range.selectNode parentNode
-          rect = range.getBoundingClientRect()
-          return {
-            top: rect.top + rect.height
-            left: rect.left
-          }
-      else
+      return range.getBoundingClientRect() unless sel.isCollapsed
+    else if sel['container'] # then it's a single point
+      range = rangy.createRange()
+      range.setStart sel['container'], sel['offset']
+    else # it's a range
+      range = sel
+      
+    if (node = range.startContainer).nodeType is TEXT_NODE
+      if (offset = range.startOffset) is 0
+        range = rangy.createRange()
+        range.selectNode node
         return range.getBoundingClientRect()
+      else
+        range = range.cloneRange()
+        range.setStart(node, offset-1)
+        rect = range.getBoundingClientRect()
+        if rect.height is 0
+          range.setStart(node, offset)
+          range.setEnd(node, offset+1)
+          return rect if (rect = range.getBoundingClientRect()).height isnt 0
+          range.selectNode node
+          rect = range.getBoundingClientRect()
+        return { top: rect.top, left: rect.right } if rect.height
+    else if containedNode = node.childNodes?[range.startOffset]
+      range = rangy.createRange()
+      range.selectNode containedNode
+      return range.getBoundingClientRect()
+    else if parentNode = node.parentNode
+      range = rangy.createRange()
+      range.selectNode parentNode
+      rect = range.getBoundingClientRect()
+      return {
+        top: rect.top + rect.height
+        left: rect.left
+      }
 
     0
 
@@ -98,3 +101,4 @@ if typeof rangy.getSelection is 'function'
       range.selectNode @[0]
       sel.addRange range
       this
+
