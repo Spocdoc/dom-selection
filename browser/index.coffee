@@ -72,7 +72,15 @@ if typeof rangy.getSelection is 'function'
         rect = range.getBoundingClientRect()
         if rect.height is 0
           range.setStart(node, offset)
-          range.setEnd(node, offset+1)
+          try
+            range.setEnd(node, offset+1)
+          catch _error
+            try
+              range.setEnd(node, offset)
+              range.setStart(node, offset-1)
+            catch _error
+              range.selectNode node
+              return range.getBoundingClientRect()
           return rect if (rect = range.getBoundingClientRect()).height isnt 0
           range.selectNode node
           rect = range.getBoundingClientRect()
@@ -81,14 +89,18 @@ if typeof rangy.getSelection is 'function'
       range = rangy.createRange()
       range.selectNode containedNode
       return range.getBoundingClientRect()
-    else if parentNode = node.parentNode
+    else
       range = rangy.createRange()
-      range.selectNode parentNode
-      rect = range.getBoundingClientRect()
-      return {
-        top: rect.top + rect.height
-        left: rect.left
-      }
+      range.selectNode node
+      return range.getBoundingClientRect()
+    # else if parentNode = node.parentNode
+    #   range = rangy.createRange()
+    #   range.selectNode parentNode
+    #   rect = range.getBoundingClientRect()
+    #   return {
+    #     top: rect.top + rect.height
+    #     left: rect.left
+    #   }
 
     0
 
