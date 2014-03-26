@@ -35,6 +35,12 @@ if typeof rangy.getSelection is 'function'
       catch _error
       return range
 
+  $['selection']['equal'] = (lhs, rhs) ->
+    lhs['start']['container'] is rhs['start']['container'] and
+      lhs['start']['offset'] is rhs['start']['offset'] and
+      lhs['end']['container'] is rhs['end']['container'] and
+      lhs['end']['offset'] is rhs['end']['offset']
+
   $['selection']['clear'] = ->
     try
       rangy.getSelection()?.removeAllRanges()
