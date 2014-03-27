@@ -94,7 +94,11 @@ if typeof rangy.getSelection is 'function'
     else if containedNode = node.childNodes?[range.startOffset]
       range = rangy.createRange()
       range.selectNode containedNode
-      return range.getBoundingClientRect()
+      rect = range.getBoundingClientRect()
+      if rect.height is 0 # then this child has 0 width...
+        range.selectNode node
+        rect = range.getBoundingClientRect()
+        return rect if rect.height
     else
       range = rangy.createRange()
       range.selectNode node
