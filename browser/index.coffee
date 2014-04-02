@@ -60,49 +60,41 @@ if typeof rangy.getSelection is 'function'
     if !sel? or sel.sel
       sel = (sel && sel.sel) || rangy.getSelection()
       range = sel.getRangeAt(0)
-      return range.getBoundingClientRect() unless sel.isCollapsed
+      unless sel.isCollapsed
+        return range.getBoundingClientRect()
+      range = range.cloneRange()
     else if sel['container'] # then it's a single point
       range = rangy.createRange()
       range.setStart sel['container'], sel['offset']
     else # it's a range
-      range = sel
+      range = sel.cloneRange()
       
     if (node = range.startContainer).nodeType is TEXT_NODE
-      if (offset = range.startOffset) is 0
-        range = rangy.createRange()
-        range.selectNode node
-        return range.getBoundingClientRect()
-      else
-        range = range.cloneRange()
-        range.setStart(node, offset-1)
-        rect = range.getBoundingClientRect()
-        if rect.height is 0
-          range.setStart(node, offset)
-          try
-            range.setEnd(node, offset+1)
-          catch _error
-            try
-              range.setEnd(node, offset)
-              range.setStart(node, offset-1)
-            catch _error
-              range.selectNode node
-              return range.getBoundingClientRect()
-          return rect if (rect = range.getBoundingClientRect()).height isnt 0
-          range.selectNode node
-          rect = range.getBoundingClientRect()
-        return { top: rect.top, left: rect.right } if rect.height
+      startOffset = range.startOffset
+      loop
+        return rect if (rect = range.getBoundingClientRect()).height
+        break if --startOffset < 0
+        range.setStart node, startOffset
     else if containedNode = node.childNodes?[range.startOffset]
-      range = rangy.createRange()
       range.selectNode containedNode
-      rect = range.getBoundingClientRect()
-      if rect.height is 0 # then this child has 0 width...
-        range.selectNode node
-        rect = range.getBoundingClientRect()
-        return rect if rect.height
-    else
-      range = rangy.createRange()
+      return rect if (rect = range.getBoundingClientRect()).height
+
+    loop
       range.selectNode node
-      return range.getBoundingClientRect()
+      return rect if (rect = range.getBoundingClientRect()).height
+
+      while alt = node.nextSibling
+        range.selectNode alt
+        return rect if (rect = range.getBoundingClientRect()).height
+
+      while alt = node.previousSibling
+        range.selectNode alt
+        return rect if (rect = range.getBoundingClientRect()).height
+
+      break unless node = node.parentNode
+
+    0
+
     # else if parentNode = node.parentNode
     #   range = rangy.createRange()
     #   range.selectNode parentNode
@@ -111,8 +103,7 @@ if typeof rangy.getSelection is 'function'
     #     top: rect.top + rect.height
     #     left: rect.left
     #   }
-
-    0
+    # 0
 
 
   $['fn']['extend']
