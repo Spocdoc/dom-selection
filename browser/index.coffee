@@ -83,11 +83,13 @@ if typeof rangy.getSelection is 'function'
       range.selectNode node
       return rect if (rect = range.getBoundingClientRect()).height
 
-      while alt = node.nextSibling
+      alt = node
+      while alt = alt.nextSibling
         range.selectNode alt
         return rect if (rect = range.getBoundingClientRect()).height
 
-      while alt = node.previousSibling
+      alt = node
+      while alt = alt.previousSibling
         range.selectNode alt
         return rect if (rect = range.getBoundingClientRect()).height
 
