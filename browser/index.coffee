@@ -21,19 +21,55 @@ if typeof rangy.getSelection is 'function'
           sel: sel
         }
     else
-      if start['start']
-        end = start['end']
-        start = start['start']
+      if start['pageX'] # then it's a point
+        startX = start['pageX']
+        startY = start['pageY']
 
-      try
-        end ||= start
-        range = rangy.createRange()
-        range.setStart start['container'], start['offset']
-        range.setEnd end['container'], end['offset']
-        sel.removeAllRanges()
-        sel.addRange range
-      catch _error
-      return range
+        end ?= start
+        endX = end['pageX']
+        endY = end['pageY']
+
+        try
+          if document['caretRangeFromPoint']
+            start = document.caretRangeFromPoint(startX, startY)
+            end = document.caretRangeFromPoint(endX, endY)
+            range = document.createRange()
+            range.setStart(start.startContainer, start.startOffset)
+            range.setEnd(end.startContainer, end.startOffset)
+          else if document['caretPositionFromPoint']
+            start = document.caretPositionFromPoint(startX, startY)
+            end = document.caretPositionFromPoint(endX, endY)
+            range = document.createRange()
+            range.setStart(start.offsetNode, start.offset)
+            range.setEnd(end.offsetNode, end.offset)
+
+          if range
+            sel.removeAllRanges()
+            sel.addRange range
+          else if document['body']['createTextRange']
+            range = document.body.createTextRange()
+            range.moveToPoint(startX, startY)
+            endRange = range.duplicate()
+            endRange.moveToPoint(endX, endY)
+            range.setEndPoint("EndToEnd", endRange)
+            range.select()
+            range = rangy.getSelection()?.getRangeAt(0)
+        catch _error
+        return range
+      else
+        if start['start']
+          end = start['end']
+          start = start['start']
+
+        try
+          end ||= start
+          range = rangy.createRange()
+          range.setStart start['container'], start['offset']
+          range.setEnd end['container'], end['offset']
+          sel.removeAllRanges()
+          sel.addRange range
+        catch _error
+        return range
 
   $['selection']['equal'] = (lhs, rhs) ->
     lhs['start']['container'] is rhs['start']['container'] and
