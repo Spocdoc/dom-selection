@@ -31,8 +31,8 @@ if typeof rangy.getSelection is 'function'
 
         try
           if document['caretPositionFromPoint'] # standard
-            start = document.caretPositionFromPoint(startX, startY)
-            end = document.caretPositionFromPoint(endX, endY)
+            start = document['caretPositionFromPoint'](startX, startY)
+            end = document['caretPositionFromPoint'](endX, endY)
             range = document.createRange()
             range.setStart(start.offsetNode, start.offset)
             range.setEnd(end.offsetNode, end.offset)
@@ -41,8 +41,8 @@ if typeof rangy.getSelection is 'function'
             startY = start['clientY']
             endX = end['clientX']
             endY = end['clientY']
-            start = document.caretRangeFromPoint(startX, startY)
-            end = document.caretRangeFromPoint(endX, endY)
+            start = document['caretRangeFromPoint'](startX, startY)
+            end = document['caretRangeFromPoint'](endX, endY)
             range = document.createRange()
             range.setStart(start.startContainer, start.startOffset)
             range.setEnd(end.startContainer, end.startOffset)
@@ -51,11 +51,11 @@ if typeof rangy.getSelection is 'function'
             sel.removeAllRanges()
             sel.addRange range
           else if document['body']['createTextRange'] # IE
-            range = document.body.createTextRange()
-            range.moveToPoint(startX, startY)
-            endRange = range.duplicate()
-            endRange.moveToPoint(endX, endY)
-            range.setEndPoint("EndToEnd", endRange)
+            range = document['body']['createTextRange']()
+            range['moveToPoint'](startX, startY)
+            endRange = range['duplicate']()
+            endRange['moveToPoint'](endX, endY)
+            range['setEndPoint']("EndToEnd", endRange)
             range.select()
             range = rangy.getSelection()?.getRangeAt(0)
         catch _error
