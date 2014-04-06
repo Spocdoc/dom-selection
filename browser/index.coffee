@@ -30,23 +30,27 @@ if typeof rangy.getSelection is 'function'
         endY = end['pageY']
 
         try
-          if document['caretRangeFromPoint']
-            start = document.caretRangeFromPoint(startX, startY)
-            end = document.caretRangeFromPoint(endX, endY)
-            range = document.createRange()
-            range.setStart(start.startContainer, start.startOffset)
-            range.setEnd(end.startContainer, end.startOffset)
-          else if document['caretPositionFromPoint']
+          if document['caretPositionFromPoint'] # standard
             start = document.caretPositionFromPoint(startX, startY)
             end = document.caretPositionFromPoint(endX, endY)
             range = document.createRange()
             range.setStart(start.offsetNode, start.offset)
             range.setEnd(end.offsetNode, end.offset)
+          else if document['caretRangeFromPoint'] # webkit
+            startX = start['clientX']
+            startY = start['clientY']
+            endX = end['clientX']
+            endY = end['clientY']
+            start = document.caretRangeFromPoint(startX, startY)
+            end = document.caretRangeFromPoint(endX, endY)
+            range = document.createRange()
+            range.setStart(start.startContainer, start.startOffset)
+            range.setEnd(end.startContainer, end.startOffset)
 
           if range
             sel.removeAllRanges()
             sel.addRange range
-          else if document['body']['createTextRange']
+          else if document['body']['createTextRange'] # IE
             range = document.body.createTextRange()
             range.moveToPoint(startX, startY)
             endRange = range.duplicate()
